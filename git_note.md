@@ -133,4 +133,21 @@ $git commit -m "mark" //重新提交
 3. `--hard`,工作目录和暂存区文档全部丢弃。
 4. `git reflog`可以查看head移动的记录，只要切换分支或是reset都会造成head移动
 5. `git log -g`如果加上`-g`参数，也能看到`reflog`
+6. `reflog`预设记录会保留30天。
 
+# 查看及切换分支的方法
+1. 查看`git branch`
+2. 切换`git checkout xxx`，如果`xxx`分支不存在，则会报错，可改为`git checkout -b xxx`,即可新建一个分支，如之前有，则不会重建。
+3. 查看当前head(40个字节),`cat .git/HEAD`
+4. head通常会指向目前所在的分支，不过也不一定，当head没有指向某个分支时便出出现`detached HEAD`的状态。
+5. 新建分支`git branch xxx`或`git branch bird sha-1`,`bird`为新建的分支名，`sha-1`为commit名称。即在`sha-1`这个commit上开一个叫做bird的分支。用`git checkout -b bird sha-1`也有同样的效果，还会直接切换过去。
+6. 分支改名`git branch -m master slave`将`master`分支改名为`slave`分支。
+7. 删除分支dog，`git branch -d dog`,如果dog分支没被完全合并，git会有提示，`git branch -D dog`则可强制删除。
+8. git中所有分支都能删除，包括master分支
+
+# 只提交文档内容的一部分的办法
+1. `git add -p index.html`的`-p`的含义会给出是否把文档内容添加到暂存区，选`y`则添加整个内容，选`e`只添加部分内容。
+
+# 分支如何合并？
+1. `git merge xxx`当前分支将xxx分支合并进来，`git merge xxx --no-ff`意思是不要使用快转模式合并，这样额外多出一个commit物件。
+2. 合并分支其实是合并`分支指向的commit`，分支只是一张贴纸，它是无法合并的。
