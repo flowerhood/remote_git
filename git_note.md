@@ -123,3 +123,14 @@ $git commit -m "mark" //重新提交
 
 # 第四节
 1. `git log -p welcome.html`可以查看这个文件每次的提交做了什么修改，
+2. `git blame git_note.md`或`git blame -L 5,10 git_note.md`指定行数，可以清楚看出哪一行是谁在什么时候写的。
+3. 误删除重要文件，如`rm *\**.html`,可用`git checkout .`或`git checkout xx.html`救回全部或一个被删除的文件，实质是拿暂存区的文件或内容，覆盖掉已被删除的工作目录内的文件或内容，如果`git check HEAD~2 git_note.md`则会拿两个版本之前的`git_note.md`文档覆盖掉现在的工作目录里的`git_note.md`文档，且同时也同步更新暂存区的状态。
+4. 刚才的commit后悔了，想撤销重做的办法是，`git reset 2558575^`,或`git reset head^`,回撤2次就直接执行`git reset head^^`,5次就执行`git reset head~5`
+
+# reset的三种模式（reset在这里有`前往go to`或`变成 become`的意思）
+1. `--mixed`预设缺省模式，会丢弃暂存区文档，但不会动工作目录文档
+2. `--soft`,工作目录和暂存区文档都不会丢弃，看起来只有head的移动而已。
+3. `--hard`,工作目录和暂存区文档全部丢弃。
+4. `git reflog`可以查看head移动的记录，只要切换分支或是reset都会造成head移动
+5. `git log -g`如果加上`-g`参数，也能看到`reflog`
+
