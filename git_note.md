@@ -110,7 +110,9 @@ $git reset //把最后一次的commit拆掉
 $git add newfile //加入新文件
 $git commit -m "mark" //重新提交 
 ```
-
+14. 提交时出现`Unlink of file. ’ file path and name’ failed. Should I try again? (y/n)`的原因
+	- 因为其它ide程序正在使用该文件，关闭后即可
+	- 也可执行`git gc`后再提交，则不会再出现此提示。已尝试，不管用。
 # 第3节
 1. 工作区新增空目录`images`，使用`git status`是不变有变化的，也无法提交，除非在目录下放一个名为`.keep`或`.gitkeep`的空文件，让git感应到空目录的存在。如在该空目录下执行`touch images/.keep`
 2. 有些文件不想放在git里面如何实现
@@ -121,7 +123,7 @@ $git commit -m "mark" //重新提交
 5. 如果要对之前的文件起作用，必须使用`git rm --cached`移出git控管的这些文件。
 6. 如果要强行清除那些已经被忽略的文件，可用`git clean -fX`命令。
 
-# 第四节
+# 第4节
 1. `git log -p welcome.html`可以查看这个文件每次的提交做了什么修改，
 2. `git blame git_note.md`或`git blame -L 5,10 git_note.md`指定行数，可以清楚看出哪一行是谁在什么时候写的。
 3. 误删除重要文件，如`rm *\**.html`,可用`git checkout .`或`git checkout xx.html`救回全部或一个被删除的文件，实质是拿暂存区的文件或内容，覆盖掉已被删除的工作目录内的文件或内容，如果`git check HEAD~2 git_note.md`则会拿两个版本之前的`git_note.md`文档覆盖掉现在的工作目录里的`git_note.md`文档，且同时也同步更新暂存区的状态。
@@ -151,3 +153,4 @@ $git commit -m "mark" //重新提交
 # 分支如何合并？
 1. `git merge xxx`当前分支将xxx分支合并进来，`git merge xxx --no-ff`意思是不要使用快转模式合并，这样额外多出一个commit物件。
 2. 合并分支其实是合并`分支指向的commit`，分支只是一张贴纸，它是无法合并的。
+
