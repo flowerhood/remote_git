@@ -154,3 +154,15 @@ $git commit -m "mark" //重新提交
 1. `git merge xxx`当前分支将xxx分支合并进来，`git merge xxx --no-ff`意思是不要使用快转模式合并，这样额外多出一个commit物件。
 2. 合并分支其实是合并`分支指向的commit`，分支只是一张贴纸，它是无法合并的。
 
+# .git目录解读
+1. 如`index.html`文件加入暂存区后，会在.git目录下生成一个Blob（Binary large object）对象。这个blob对象只是存放`index.html`文件的“内容”，但`.git`目录下并不会存在`index.html`。
+2. `echo "hello, 5xRuby" | git hash-object --stdin`可计算出blob对象的sha-1值。共40个字，前2个字生成目录，存放在`.git/objects/xx`,剩下38字，形成文件存放在此目录下。可通过`git cat-file -t 40个sha-1值`，返回对象的形态为`blob`,再通过`git cat-file -p 40个sha-1值`,返回此文件内容为`hello,5xRuby`
+3. git只对文件处理，包括没有任何内容的空文件，但不对空目录处理，空目录无法加入到git中
+4. 文件在git会以Blob对象的形式存放
+5. 目录及文件的名称会以Tree对象的形式存放
+6. Tree对象的内容会指向某个或某些blob对象，或者其他的Tree对象。看起来像目录也子目录关系，其实不是，有个专有名称为DAG(directed acyclic graph)有向无环图，这些对象之韵只有指来指去的关系，没有阶层关系。
+
+
+
+
+
