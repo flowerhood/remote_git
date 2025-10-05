@@ -146,7 +146,13 @@ $git commit -m "mark" //重新提交
 6. 分支改名`git branch -m master slave`将`master`分支改名为`slave`分支。
 7. 删除分支dog，`git branch -d dog`,如果dog分支没被完全合并，git会有提示，`git branch -D dog`则可强制删除。
 8. git中所有分支都能删除，包括master分支
-
+9. git中的分支概念不是把文件先复制到另外的目录，然后改动合并，对比后放回原来的目录，实际上分支只是贴在commit上面的一张贴纸。
+10. 当做了一次新的commit后，这个新的commit会指向它的前一个commit，当前的分支指的head所指的分支，会贴到刚刚新的那个commit上，同时head也会跟着前进。比如当前head指向master分支，执行`git branch cat`创建cat分支，实际上cat和master都是贴在同一个comiit的两张贴纸，再执行`git checkout cat`切换到cat分支，则head转而从指向master转至指向cat分支。
+11. 接着执行一次新的commit，这个新commit依然会指向前一个commit，此时cat分支上的“贴纸”会被撕下来，转而贴到最新的commit上，当然head也跟着同步贴上去重新指向cat
+12. 切换到不同的分支，会显示不同的暂存区和工作目录下的文件。
+13. 切换分支时主要做了以下两件事
+	1. 更新暂存区和工作目录,会用该分支指向的commit的内容来`更新`暂存区和工作目录。
+	2. 变更`HEAD`的位置
 # 只提交文档内容的一部分的办法
 1. `git add -p index.html`的`-p`的含义会给出是否把文档内容添加到暂存区，选`y`则添加整个内容，选`e`只添加部分内容。
 
@@ -160,7 +166,40 @@ $git commit -m "mark" //重新提交
 3. git只对文件处理，包括没有任何内容的空文件，但不对空目录处理，空目录无法加入到git中
 4. 文件在git会以Blob对象的形式存放
 5. 目录及文件的名称会以Tree对象的形式存放
-6. Tree对象的内容会指向某个或某些blob对象，或者其他的Tree对象。看起来像目录也子目录关系，其实不是，有个专有名称为DAG(directed acyclic graph)有向无环图，这些对象之韵只有指来指去的关系，没有阶层关系。
+6. Tree对象的内容会指向某个或某些blob对象，或者其他的Tree对象。对看起来像目录也子目录关系，其实不是，有个专有名称为DAG(directed acyclic graph)有向无环图，这些对象之韵只有指来指去的关系，没有阶层关系。
+7. commit对象会指向某个tree对象
+8. tree对象的内容会指向某个或某些blob对象或其它的tree对象,这种结构有点像葡萄，只要伸手把源头的commit对象拎起来，整串内容都可以被拿出来。
+9. 除了第一个commit对象外，所有commit对象都会指向其前一次的commit对象。
+10. 使用`git count-objects`可计算对象数。
+11. 使用`git tag -a big_treasure -m "xxxx"`可增加tag对象。
+12. tag对象会指向某个commit对象
+13. 分支虽然不属于4种对象之一，但它会指向某个commit对象。head也不属于4种对象之一，它会指向某个分支。
+14. 往git服务器上推送后,在`.git/refs`下会多出一个remote目录，里面放的是远端的分支，与本地分类相似，也会指向某个commit对象。
+15. `git ls-files -s`命令可查看当前文件在git中的样子
+16. `git gc`可启动`资源回收机制`，把原来在`.git/objects`目录下的对象全部打包到`.git/objects/pack`目录下，通过`find .git/objects -type f`查看现在的目录状态
+17. 也可通过较底层的命令`git verify-pack -v .git/objects/pack/pack-8ce5a808268947547de475033149350d54887f32.idx`,分3栏，第1栏是对象的sha-1值，第2栏是对象的形态，第3栏则是文件大小。
+
+ # 远程访问
+1. `HTTPS`方式push远程仓库时需要验证用户名和密码， `SSH`不需要验证用户名和密码，但需要在github上添加公钥，github在2021年8月13日后已经停止用https方式推送至远程仓库。
+2. 如何生成`SSH`公钥和私钥，实现本地与远程仓库的安全连接。
+	- 进入`~/.ssh`目录下，第一次执行`ssh-keygen -t rsa -b 4096`后直接回车，生成一对`id_rsa`名称的密钥文件，如果之前已经生成过，不能直接回车，否则会覆盖之前的密钥，此时可输入一个新的任意的密钥文件名称，如`test`,再回车,则在该目录下生成`test`私钥文件和`test.pub`公钥文件。
+	- 复制`test.pub`公钥文件全部内容，粘贴到`github→settings→SSH and GPG keys→new SSH key`
+	- 修改当前目录`~/.ssh`下的`conifg`文件，添加5行至该文件尾部
+	```
+# github
+Host github.com
+HostName github.com
+PreferredAuthentications publickey
+IdentityFile ~/.ssh/test
+	```
+
+	-  完成上述后，此时可执行`git clone git@github.com:flowerhood/remote_git.git`
+
+3. 几种同步方式
+	1. （先有远程仓库）可以先在github建立一个空仓库，然后clone至本地，在本地添加和编辑文件后，再使用`git push`不用任何参数直接推送至github端。再在github上增加一个readme文件，在本地上执行`git pull`拉取至本地。
+	2. （先有本地仓库），还是要预先在github建立一个新的空仓库，
+
+
 
 
 
