@@ -197,7 +197,9 @@ IdentityFile ~/.ssh/test
 
 3. 几种同步方式
 	1. （先有远程仓库）可以先在github建立一个空仓库，然后clone至本地，在本地添加和编辑文件后，再使用`git push`不用任何参数直接推送至github端。再在github上增加一个readme文件，在本地上执行`git pull`拉取至本地。
-	2. （先有本地仓库），还是要预先在github建立一个新的空仓库，
+	2. （先有本地仓库），还是要预先在github建立一个新的空仓库如`remote_git`，切换到本地仓库main分支，执行`git remote add origin git@github.com:flowerhood/remote_git.git`,再通过`git remote -v`查看当前本地仓库对应的远程仓库的别名和地址，再执行`git branch -M main`将本地master分支更名为`main`分支，以便和github默认的main分支名称保持一致。再执行`git push -u origin master:main`，其中u是	`upstream`的缩写，意思将本地仓库和别名为origin的远程仓库关联起来。`msaster:main`表示本地仓库的master内容推送到远程仓库的main分支，如本地master已更名为main分支，则改为`git push -u origin main:main`或进一步简写为`git push -u origin main`
+	3. 上一步容易出现[解决Git上传文件出错：[rejected] master -> master (fetch first)错误](https://cloud.baidu.com/article/3318156) 
+
 
 
 
