@@ -3,9 +3,12 @@
 # [史上最全 Git 图文教程（非常详细）零基础入门到精通，收藏这一篇就够了-CSDN博客](https://blog.csdn.net/Javachichi/article/details/140660754) 
 # [Git从入门到精通（全）-阿里云开发者社区](https://developer.aliyun.com/article/1104558) 
 # [【Git保姆级使用教程】Git从入门到精通超级详细的使用教程，一套教程带你搞定Git（高见龙版本）。_git从入门到精通pdf-CSDN博客](https://blog.csdn.net/syu_acm/article/details/141530578) 
+# [git官方操作指南](https://git-scm.com/book/zh/v2) 
 
 
 ## 第1节
+0. git终端gitbash如何显示中文不为乱码，如果加入windowsteminal,参考[Windows Terminal 集成 Git Bash_windows bash terminal-CSDN博客](https://blog.csdn.net/Magic_Ninja/article/details/122671663) 
+	- git bash配置文件修改`vim /etc/bash.bashrc`
 
 1. 每次对文件的修改都会生成一个git版本，形成一个变化内容的快照，可以用git非常快速自如回到任何过去的版本，而不会增加太多硬盘空间![01_git并不是记录版本的差异，而是记录档案内容的快照.png](/private/study/IT/git/01_git并不是记录版本的差异，而是记录档案内容的快照.png) 
 2. git是分散式系统，不需要时时与服务器同步连线，事实上一般都是离线在本机上实现git操作，等有网络的时候再与服务器同步。
@@ -138,7 +141,7 @@ $git commit -m "mark" //重新提交
 6. `reflog`预设记录会保留30天。
 
 # 查看及切换分支的方法
-1. 查看`git branch`
+1. 查看`git branch`,查看本地和远程所有分支`git branch -a`
 2. 切换`git checkout xxx`，如果`xxx`分支不存在，则会报错，可改为`git checkout -b xxx`,即可新建一个分支，如之前有，则不会重建。
 3. 查看当前head(40个字节),`cat .git/HEAD`
 4. head通常会指向目前所在的分支，不过也不一定，当head没有指向某个分支时便出出现`detached HEAD`的状态。
@@ -238,12 +241,58 @@ IdentityFile ~/.ssh/test
 	1. 此文件中提到的文件名被忽略，按`git status`,也看不到该文件的任何信息，即使按`git add .`也不会添加到暂存区。更加不能添加到版本库。但如果忽略的文件名在录入此文件中之前已经在版本中存在。则无法生效。这个文件不能是已经被添加到版本库早已存在的文件。该文件后期更改，依然能执行`git add`后再提交。解决的办法就是执行`git rm --cached file.log`从暂存区删除该文件，再提交，同步删除版本方库的该文件。
 	2. 也就是说仅对工作区文件提交暂存区之前形成的忽略文件才有效，
 	3. `.gitignore`中也可添加目录，如`temp/`尾部的`/`表示`temp`不是文件，而是一个目录，并忽略该目录中所有文件。
+		1. `*.a`,
+		2. `!lib.a`取消忽略lib.a文件，即使上一行忽略了`.a`文件。
+		3. `/TODO`只忽略当前目录的TODO文件，其他目录下的同名文件不忽略。
+		4. `doc/*.txt`与`doc/**/*.txt`具有不同的含义。
+		5. [abc][0-9][a-zA-Z]中括号【】表示匹配列表中的单个字符。两个星号表示匹配任意的中间目录，`[^abc]`因为`^`在`[]`内部，表示开头，如果在`[]`外部，表示取反
+
+11. github类似托管平台及git客户端
+	1. gitee码云（国内）
+	2. gitlab（国外），可部署本地私有化仓库
+	3. git客户端，gitKraken，sourcetree，TortoiseGit,vscode等
+	4. 在当前本地仓库目录下，执行`code .`可调出vscode来打开当前目录。
+	5. vscode中，选择`view→command patern`输入path可将code命令加入到系统path，输入`setting→选择settings.json`vscode的配置文件。
+	6. vscode源代码区打开修改过的文件，可看到并列的2个窗口，左边是修改前，右边是修改后
+	7. 文件的标识
+		1. ？？（Untracked）
+		2. M(Modified) 已修改
+		3. A（Added）  已添加暂存
+		4. D（Deleted）已删除
+		5. R（Renamed）重命令
+		6. U（Updated）已更新未合并
+	8. `git checkout`除了切换分支和状态外，还可以用来恢复文件或目录到之前的某一个状态，比如意外地修改了某一个文件，可用此命令恢复到文件修改前的状态。此时如果恰好分支名称和被修改的文件名称相同的话，就会出现歧义。此命令会默认切换分支而不是恢复文件，为避免这种歧义，git2.23版本后提供了一个新命令为`git switch x`,专门用来切换到已有的分支。`git switch -c y`切换到新建的分支。
+	9. 切换当前新分支后，工作区会发生变化，会自动包含旧分支工作区所有文件及本新分支新建的文件，但如果切换回旧分支后，原新分支新增的工作目录新文件会消失不见。切回原分支后，工作区会恢复原分支工作目录下所有文件，并不包括新分支新建立的文件。原因是旧分支没有合并新分支，所以新分支新文件在旧分支下不显示。
+	10. `git merge 将要被合并的分支名，如dev`,当前分支如果是main，如果目标分支也是main，确保当前分支为`main`,在当前分支下执行`git merge dev`,回车后，git会自动产生一次提交commit，在gitKraken中可形象观察到分支合并前后的变化，也可以执行`git log --graph --oneline --decorate --all`观察。
+	11. 上步合并分支结束后，原被合并的dev分支仍存在。并不会自动消失。除非手动删除。`git branch -d dev`表示删除已经完成合并的分支。没有合并的分支需要执行`git branch -D dev`才能删除。
+	12. 如果两个分支修改了同一个文件的同一行代码，git就不知道应该保留哪个分支的修改内容了，`git diff`命令可以看出两个分支修改的内容差异。git会使用左箭头等号及右箭头分别来表示两上分支的修改内容。不想继续执行合并用`git merge --abort`来中止合并过程，两个分支未合并前，同一文件各自修改，各自分支目录下执行ls互不可见，`git commit -a -m "xxxx"`表示在add暂存操作的同时提交。一个命令完成添加暂存和提交两个动作。
+	13. `git merge --no-ff -m  "xxxxx" xxbranch`可以更好地保留这个分支的历史记录，同时自动生成一个新的commit节点。
+	14. 自己在自己的分支dev上修改代码后，可以push后，再建立PR（pull Request）或gitlab上MR（merge request）请求合并入master或其他分支。
+	15. 文件在工作区修改后git  status显示为modified，可以执行撤销修改回到修改前的文件，`git restore xxx.file`撤销修改，也可将修改加入暂存区`git add .`,也可将文件撤销加入暂存区，通过`git restore --staged xxx.file`实现。撤销commit回到早期版本状态，使用`git reset --hard xxxxxxx.sha-1`,如果远程分支也需要同步回退，重新`git push -u origin dev`一次就可以了。可能会有`更新被拒绝，因为您当前分支的最新提交落后于其对应的远程分支`,这时需要强制推送，执行`git push --force -u orgin dev`
+	16. 常见处理分支冲突的办法，[(131) 你早晚都得会！最新Git & GitHub 实战教程：30分钟带你掌握开发必备技能 | 进阶技能 - YouTube](https://www.youtube.com/watch?v=a9T7dqDtRaY) 
+		1. 一般push失败时，应该远程分支有其它人已经更新分支，需先pull远程至本地，也有可能pull也会失败，需要指定如何调和偏离的分支。可以选择`merge`方式，把远程分支的更改合并到本地分支，创建一个新的合并，再提交。`git merge --no-rebase`或执行`git config pull.rebase false`后，以后直接执行`git pull`就可以了。不需要另加参数了。
+		2. 第二种方式是`rebase`方式，把本地提交移动到远程分支的最新提交的后面。好处是可以保持提交历史的线性，可能会破坏提交历史。
+		3. 当前版本在开发中，发现上一版本有bug，这时执行`git stash`把当前开发的内容暂存起来，再新建一个分支去修复bug,修复完毕后，再回到当前正开发的分支，执行`git stash pop`恢复之前的开发进度了。不可以不使用`git stash`而直接拉一个新的分支去修复bug，因为git仓库中，一个分支未提交的修改对其它的分支是可见的。
+		4. `git cherry-pick commitida commitidb`可以从多个commit中挑选一些进行合并，
+		5. [有趣的开源社区 - HelloGitHub](https://hellogithub.com/) github中，查询`in:name pdf in:description pdf 翻译 stars:>1000 pushed:>2025-01-01 fork:>100 language:Python`
+		6. [收费软件平替查询](https://openalternative.co/) 
+		7. 更新git bash，执行`git update-git-for-windows`
+		8. [Git合并冲突处理指南：解决二进制文件冲突_git 二进制文件冲突-CSDN博客](https://blog.csdn.net/PolarisRisingWar/article/details/138790764) 
+
+12.  Rebase与merge的区别，`git switch main→git merge dev`
+		1. rebase不用像merge必须回到main分支上展开合并，在任意分支上都可以执行合并，如在dev分支上操作，`git switch dev→git rebase main`,dev的两次提交记录都会延伸变基到main分支的末尾，形成一条直线。
+		2. `git switch main→git rebase dev`则会将main的2次提交记录延伸到dev分支的末尾。
+		3. rebase执行时会先找到需要合并的2个分支的共同祖先，也就是前面main分支的第三个提交节点，也就是分叉点，从分叉点后所有节点嫁接到目标分支最新提交记录的末尾。
+		4. merge的优点是不会破坏原分支的提交历史，方便回溯和查看。缺点是会产生额外的提交节点，分支图较复杂。
+		5. rebase优点是不会新增额外的提交记录，形成线性历史，比较直观和干净。缺点是会改变提交历史，改变了当前分支branch out的节点，应避免在共享分支使用。一般不会在公共的分支上执行rebase操作.
 
 
+13. git中关于crlf与lf行尾转换的警告[Git中的“LF will be replaced by CRLF”警告详解_git lf will be replace by crlf-CSDN博客](https://blog.csdn.net/taiyangdao/article/details/78629107) 
+	- 系统行末结束符 换行（Line Feed）和回车(Carriage Return)
+	- linux中回车键对应`$`符号，行尾必须是LF，回windows行尾必须是CRLF
+	- 回车的本意包含（\n + \r或者\r + \n）2个动作。机械英文打字机，字车最右边手动归位至最左边，名回车，然后滚筒上卷一行，以便开始输入下一行，名换行。不一定换行是下一行行首。
 
-
-
-
+14. [为什么 Git 将此文本文件视为二进制文件？- 堆栈溢出 --- Why does Git treat this text file as a binary file? - Stack Overflow](https://stackoverflow.com/questions/6855712/why-does-git-treat-this-text-file-as-a-binary-file?__cf_chl_tk=3beZdC2mbqmprpe9h8CzkS6IDWWabqS5r_5kZSixgZo-1760171667-1.0.1.1-m8dLHWRgriZN6Yra7QYrW2rfvFWbY0GedyyZfxdKBKI) 
 
 
 
