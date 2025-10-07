@@ -185,13 +185,19 @@ $git commit -m "mark" //重新提交
 	- 进入`~/.ssh`目录下，第一次执行`ssh-keygen -t rsa -b 4096`后直接回车，生成一对`id_rsa`名称的密钥文件，如果之前已经生成过，不能直接回车，否则会覆盖之前的密钥，此时可输入一个新的任意的密钥文件名称，如`test`,再回车,则在该目录下生成`test`私钥文件和`test.pub`公钥文件。
 	- 复制`test.pub`公钥文件全部内容，粘贴到`github→settings→SSH and GPG keys→new SSH key`
 	- 修改当前目录`~/.ssh`下的`conifg`文件，添加5行至该文件尾部
-	```
+---
+
+
+```
 # github
 Host github.com
 HostName github.com
 PreferredAuthentications publickey
 IdentityFile ~/.ssh/test
-	```
+```
+---
+
+
 
 	-  完成上述后，此时可执行`git clone git@github.com:flowerhood/remote_git.git`
 
@@ -199,6 +205,41 @@ IdentityFile ~/.ssh/test
 	1. （先有远程仓库）可以先在github建立一个空仓库，然后clone至本地，在本地添加和编辑文件后，再使用`git push`不用任何参数直接推送至github端。再在github上增加一个readme文件，在本地上执行`git pull`拉取至本地。
 	2. （先有本地仓库），还是要预先在github建立一个新的空仓库如`remote_git`，切换到本地仓库main分支，执行`git remote add origin git@github.com:flowerhood/remote_git.git`,再通过`git remote -v`查看当前本地仓库对应的远程仓库的别名和地址，再执行`git branch -M main`将本地master分支更名为`main`分支，以便和github默认的main分支名称保持一致。再执行`git push -u origin master:main`，其中u是	`upstream`的缩写，意思将本地仓库和别名为origin的远程仓库关联起来。`msaster:main`表示本地仓库的master内容推送到远程仓库的main分支，如本地master已更名为main分支，则改为`git push -u origin main:main`或进一步简写为`git push -u origin main`
 	3. 上一步容易出现[解决Git上传文件出错：[rejected] master -> master (fetch first)错误](https://cloud.baidu.com/article/3318156) 
+	4. 远程仓库添加新文件后，可以通过`git pull <远程仓库名如origin> <远程分支名如main>:<本地分支名如main>`拉取同步数据,自动进行了一次merge合并至本地仓库操作。如果不想自动合并，只是获取远程仓库数据，执行`git fetch`，以后再进行手动合并。
+
+
+# [(128) 两小时Git入门教程 - YouTube](https://www.youtube.com/watch?v=PN1k1CLXtlw) 
+1. ls -altr
+2. `git init my-repo`通过命令直接生成一个名为my-repo的本地仓库。
+3. 工作区的文件是不能直接commit提交至仓库的，只有暂存区的文件才能commit提交到仓库（即.git目录）
+4. 文件四种状态
+	1. untrack(新创建，还未被git管理，只存在于工作区)
+	2. unmodified（已被git管理的文件，文件内容没有变化，没有被修改过）
+	3. modified（已经被修改，还未添加到暂存区）
+	4. staged（修改后已经添加到暂存区）
+5. `git add .`已经提交至暂存区的文件可通过`git rm --cached <file>`删除撤回。
+6. `git ls-files`可查看暂存区的文件。
+7. `git reset --hard HEAD^`回退到上一个commit版本。再用`ls`和`git ls-files`分别查看工作区和暂存区文件的变化，如果是默认的`--mixed`参数，则会丢弃暂存区的文件但保留工作区的文件。
+8. git diff查看工作区暂存区和本地仓库之间的差异以及不同版本不同分支之间的差异
+	1. git可将每个文件的内容都分别生成一个40位的hash值。便于比较差异。
+	2. 使用`git diff`比较工作区和暂存区的差异。
+	3. 使用`git diff HEAD`比较工作区和版本库之间的差异
+	4. 使用`git diff --cached|staged`比较暂存区和版本库之间的差异
+	5. 使用`git diff 7xxxx 7yyyyy`比较两次commit提交版本的差异 ，或`git diff 7yyyyy HEAD`比较最新提交的节点和之前提交ID之间的差异。`git diff HEAD~ HEAD`当前版本和上一次版本的差异,`HEAD~`表示上一次提交的版本，`HEAD~2`表示上两次提交的版本，依次类推。HEAD指向分支的最新提交节点。
+	6. `git diff HEAD~3 HEAD file3.txt`仅比较两个版本file3文件的差异。
+	7. `git diff <branch_name> <branch_name>`比较分支之间的差异。
+9.  git删除文件
+	1. 分两步进行，先从工作区中通过rm删除，再通过git add更新暂存区同步删除。
+	2. `git rm files.txt`,一步实现同时删除工作区和暂存区文件。
+	3. 以上2步如果最后没有提交，则被删除的文件在版本库仍存在。
+	4. `git rm -r 星号`递归删除某个目录下的所有子目录和文件
+	5. 以上删除文件后，不能忘记提交
+10. `.gitignore`文件
+	1. 此文件中提到的文件名被忽略，按`git status`,也看不到该文件的任何信息，即使按`git add .`也不会添加到暂存区。更加不能添加到版本库。但如果忽略的文件名在录入此文件中之前已经在版本中存在。则无法生效。这个文件不能是已经被添加到版本库早已存在的文件。该文件后期更改，依然能执行`git add`后再提交。解决的办法就是执行`git rm --cached file.log`从暂存区删除该文件，再提交，同步删除版本方库的该文件。
+	2. 也就是说仅对工作区文件提交暂存区之前形成的忽略文件才有效，
+	3. `.gitignore`中也可添加目录，如`temp/`尾部的`/`表示`temp`不是文件，而是一个目录，并忽略该目录中所有文件。
+
+
 
 
 
