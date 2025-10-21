@@ -318,7 +318,8 @@ IdentityFile ~/.ssh/test
 	18. 工作临时中断，需要临时先处理其它分支，可先commit本分支后再切换到其他分支工作，处理完毕后，再`git reset HEAD^`回来原分支继续完成剩下的工作。另一种办法是，可使用`git stash`先把本分支作的修改先存起来，保存场景，（untracked状态的文件是没办法被stash,需要额外使用-u参数），再观察`git status`发现干净了。那些文件去哪儿了？可用`git stash list`查看。可执行多次`git stash`命令形成多份stash。WIP（work in progress）工作进行中的意思。
 	19. 已完成先前临时插入的其他工作，再回来原来中断并已stash的工作。找到`git stash list`中原中断的工作，如`stash@{2}`,执行`git stash pop stash@{2}`,将某个stash拿出来套用在目前的分支上，套用过的stash就会被删除。如果不想删除stash，可用`git stash apply stash@{2}0`代替，如果后面没有指定要pop哪一个stash，会从编号最小的，也就是`stash@{0}`开始拿（就是最后叠上去的那次）
 	20. 如果那个stash确定不要，可以使用`git stash drop stash@{0}`从列表中删除。
-
+	21. 删除多个commit中都共同存在的且已push的某个密码文件，比较直观的办法是使用rebase指令，一个一个comiit去编辑。可用`git filter-branch --tree-filter "rm -f config/database.yml"`即可。如果后悔了，而filter-branch操作执行的同时git会把状态备份一份在`.git/refs/original/refs/heads`目录里，实际只是备份进行filter-branch之前的那个HEAD的sha-1值而已。此时后悔可直接hard reset sha-1即可恢复删除前状态。或执行`git reset refs/original/refs/heads/master --hard`
+	22. 老实说已经push了，和倒出去的水一样收不回来，能做的就是`git push -f`,重新强制push一份刚刚已经filter-branch过的commit上去
 
 
 
