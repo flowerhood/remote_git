@@ -295,5 +295,33 @@ IdentityFile ~/.ssh/test
 14. [为什么 Git 将此文本文件视为二进制文件？- 堆栈溢出 --- Why does Git treat this text file as a binary file? - Stack Overflow](https://stackoverflow.com/questions/6855712/why-does-git-treat-this-text-file-as-a-binary-file?__cf_chl_tk=3beZdC2mbqmprpe9h8CzkS6IDWWabqS5r_5kZSixgZo-1760171667-1.0.1.1-m8dLHWRgriZN6Yra7QYrW2rfvFWbY0GedyyZfxdKBKI) 
 
 
+# 第七章 修改commit历史信息
+- 修改最后一次commit信息可用`--amend`
+- 修改所有commit历史范围的提交信息，分两步
+	1. `git log --oneline`显示全部commit历史。
+	2. `git rebase -i sha-1(init commit)`指定指令应用范围从当前至第一个init commit。
+	3. 在vim窗口中，将想要修改的commit开头`pick`改为`reword`,pick的意思是保留这次的commit不做修改，而reword是重新修改的意思。
+	4. 如果出现合并冲突，通过`git diff`查看冲突原因，解决后`git rebase --continue`继续中断后的进程。
+	5. 如果rebase执行成功后，想取消并回到rebase之前的话，执行`git reset ORIG__HEAD --hard`即可。
+	6. 如果将多个commit合并为一个，在vim窗口中，将想要修改的commit开头`pick`改为`squash`,pick的意思是保留这次的commit不做修改，而squash是与上面的一行commit合并为一个commit。
+	7. 如果将一个commit拆分为多个commit，在vim窗口中，将想要修改的commit开头`pick`改为`edit`,pick的意思是保留这次的commit不做修改，rebase到`edit`会中断执行。此时再执行`git reset HEAD^`,目录中会出现多个处于untracked的文件，再依次执行`add和commit`二段式指令，执行完成后，最后继续执行`git rebase --continue`跑完。
+	8. 在两个相邻commit之间插入新的其它commit时，参照上面拆分方法。在sourcetree中操作时，光标定在两个相邻commit的下面那个，不能定位上面的来操作。
+	9. 改变commit历史顺序时，直接在vim中编辑所需要的行间顺序即可。如果想删除某个commit，也可在vim删除中删除commit信息即可。
+	10. 调整commit顺序或删除某个commit，都有逻辑相关性问题，要慎用。
+	11. 如果要取消最后一次的commit，可使用`git revert HEAD --no-edit`,表示不编辑commit信息，原commit历史依然存在不会消失，反而在上面还会增加一条原commit历史信息的反向commit记录。这个指令的意思是再做一个新的commit，来取消你不要的commit的概念，所以commit数量才会增加，相当于红冲。如果这个红冲的commit也不想要了，再来一次`git revert HEAD --no-edit`，则回到第一次revert操作前的状态。负负得正。如果要砍掉这个revert，直接使用`git reset HEAD^ --hard`也能回来revert之前的状态。
+	12. revert命令适用于多人共同协作的项目，团队开发，不一定有机会使用reset指令，这时可用revert指令来做出一个取消的commit，对其它人来说不算是修改历史，而是新增一个commit，只是这个commit与某个即有的commit反向而已。
+	13. reset和rebase都会改变历史记录，而revert不会，reset和rebase通常适用于尚未push出去的commit，而rebase适用于已经push出去的commit，或是不允许使用reset或rebase之修改历史记录的指令的场合。
+	14. `git tag tag__name sha-1`或`git tag tag__name sha-1 -a -m "xxxxx"`给commit添加tag轻量标签和附注标签。-a参数表示请git建立有附注的标签。
+	15. `git show tag__name`查看标签的信息。标签存放于`.git/refs/tags`,轻量标签指向某一个commit，而附注标签指向某个tag物件，该物件才再指向那个commit。
+	16. `git tag -d tag__name`删除标签。
+	17. 标签与分支都是一个指标，分支存放在`.git/refs/heads`目录下，两者都是一个40字节的sha-1值。被删除时，都不会影响到被指到的那个物件。两者的差别在于分支会随着commit而移动，而标签不会。分支是会移动的标签。
+	18. 工作临时中断，需要临时先处理其它分支，可先commit本分支后再切换到其他分支工作，处理完毕后，再`git reset HEAD^`回来原分支继续完成剩下的工作。另一种办法是，可使用`git stash`先把本分支作的修改先存起来，保存场景，（untracked状态的文件是没办法被stash,需要额外使用-u参数），再观察`git status`发现干净了。那些文件去哪儿了？可用`git stash list`查看。可执行多次`git stash`命令形成多份stash。WIP（work in progress）工作进行中的意思。
+	19. 已完成先前临时插入的其他工作，再回来原来中断并已stash的工作。找到`git stash list`中原中断的工作，如`stash@{2}`,执行`git stash pop stash@{2}`,将某个stash拿出来套用在目前的分支上，套用过的stash就会被删除。如果不想删除stash，可用`git stash apply stash@{2}0`代替，如果后面没有指定要pop哪一个stash，会从编号最小的，也就是`stash@{0}`开始拿（就是最后叠上去的那次）
+	20. 如果那个stash确定不要，可以使用`git stash drop stash@{0}`从列表中删除。
+
+
+
+
+
 
 
