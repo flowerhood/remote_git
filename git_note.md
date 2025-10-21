@@ -186,7 +186,7 @@ $git commit -m "mark" //重新提交
 1. `HTTPS`方式push远程仓库时需要验证用户名和密码， `SSH`不需要验证用户名和密码，但需要在github上添加公钥，github在2021年8月13日后已经停止用https方式推送至远程仓库。
 2. 如何生成`SSH`公钥和私钥，实现本地与远程仓库的安全连接。
 	- 进入`~/.ssh`目录下，第一次执行`ssh-keygen -t rsa -b 4096`后直接回车，生成一对`id_rsa`名称的密钥文件，如果之前已经生成过，不能直接回车，否则会覆盖之前的密钥，此时可输入一个新的任意的密钥文件名称，如`test`,再回车,则在该目录下生成`test`私钥文件和`test.pub`公钥文件。
-	- 复制`test.pub`公钥文件全部内容，粘贴到`github→settings→SSH and GPG keys→new SSH key`
+	- 复制`test.pub`公钥文件全部内容，粘贴到`github→settings→SSH and GPG keys→new SSH key`,这种方式是适用于github账号下所有仓库，也可在某个具体仓库下的页面选择`settings`设置公钥，仅适用于该仓库，对其他仓库不适用。
 	- 修改当前目录`~/.ssh`下的`conifg`文件，添加5行至该文件尾部
 ---
 
@@ -206,9 +206,9 @@ IdentityFile ~/.ssh/test
 
 3. 几种同步方式
 	1. （先有远程仓库）可以先在github建立一个空仓库，然后clone至本地，在本地添加和编辑文件后，再使用`git push`不用任何参数直接推送至github端。再在github上增加一个readme文件，在本地上执行`git pull`拉取至本地。
-	2. （先有本地仓库），还是要预先在github建立一个新的空仓库如`remote_git`，切换到本地仓库main分支，执行`git remote add origin git@github.com:flowerhood/remote_git.git`,再通过`git remote -v`查看当前本地仓库对应的远程仓库的别名和地址，再执行`git branch -M main`将本地master分支更名为`main`分支，以便和github默认的main分支名称保持一致。再执行`git push -u origin master:main`，其中u是	`upstream`的缩写，意思将本地仓库和别名为origin的远程仓库关联起来。`msaster:main`表示本地仓库的master内容推送到远程仓库的main分支，如本地master已更名为main分支，则改为`git push -u origin main:main`或进一步简写为`git push -u origin main`
-	3. 上一步容易出现[解决Git上传文件出错：[rejected] master -> master (fetch first)错误](https://cloud.baidu.com/article/3318156) 
-	4. 远程仓库添加新文件后，可以通过`git pull <远程仓库名如origin> <远程分支名如main>:<本地分支名如main>`拉取同步数据,自动进行了一次merge合并至本地仓库操作。如果不想自动合并，只是获取远程仓库数据，执行`git fetch`，以后再进行手动合并。
+	2. （先有本地仓库），还是要预先在github建立一个新的空仓库如`remote_git`，切换到本地仓库main分支，执行`git remote add origin git@github.com:flowerhood/remote_git.git`,此处的`origin`指的后面的`git@github.com:flowerhood/remote_git.git`服务器的位置，可以换成任意的名字，预设的github远端节点也会叫`origin`,再通过`git remote -v`查看当前本地仓库对应的远程仓库的别名和地址，再执行`git branch -M main`将本地master分支更名为`main`分支，以便和github默认的main分支名称保持一致。再执行`git push -u origin master:main`，其中u是	`upstream上游`的缩写，意思将本地仓库和别名为origin的上游远程仓库关联起来。`msaster:main`表示本地仓库的master内容推送到远程仓库的main分支，如本地master已更名为main分支，则改为`git push -u origin main:main`或进一步简写为`git push -u origin main`,简写的意思即使远程server不存在main分支，就会建立一个main的同名分支。如果存在同名分支，便会移动sever上main分支的位置，使它指到目前最新进度上。比如`git push dragonball cat`,意思就是把cat分支推上dragonball这个远端节点所代表的位置，并在上面建立一个名为cat同名分支（或更新进度），也可给远程分支另取与本地分支不同名的分支，如`git push origin main:cat`,orgin节点下面的cat分支，无则新建，有则更新。
+	3. 上一步容易出现[解决Git上传文件出错：[rejected] master -> master (fetch first)错误](https://cloud.baidu.com/article/3318156) push时如果远端比较新，则需要先拉取`git pull --rebase`,再`git push`,也可加参数-f强推，不过有可能覆盖别人push的内容，`git push -f`慎用。
+	4. 远程仓库添加新文件后，可以通过`git pull <远程仓库名如origin> <远程分支名如main>:<本地分支名如main>`拉取同步数据,自动进行了一次merge合并至本地仓库操作。如果不想自动合并，只是获取远程仓库数据，执行`git fetch`，以后再进行手动合并。`git pull = git fetch + git merge`,如果不想用merge合并，想用rebase合并，则拉取时执行`git pull --rebase`,好处就是多人开发的时候，大家各自在自己的分支上进行commit，拉回来用一般的方式合并会产生为了合并而产生的额外commit，如果不想要这个额外的commit，则采用此种rebase方式拉取为妥。
 
 
 # [(128) 两小时Git入门教程 - YouTube](https://www.youtube.com/watch?v=PN1k1CLXtlw) 
@@ -269,6 +269,9 @@ IdentityFile ~/.ssh/test
 	13. `git merge --no-ff -m  "xxxxx" xxbranch`可以更好地保留这个分支的历史记录，同时自动生成一个新的commit节点。
 	14. 自己在自己的分支dev上修改代码后，可以push后，再建立PR（pull Request）或gitlab上MR（merge request）请求合并入master或其他分支。
 	15. 文件在工作区修改后git  status显示为modified，可以执行撤销修改回到修改前的文件，`git restore xxx.file`撤销修改，也可将修改加入暂存区`git add .`,也可将文件撤销加入暂存区，通过`git restore --staged xxx.file`实现。撤销commit回到早期版本状态，使用`git reset --hard xxxxxxx.sha-1`,如果远程分支也需要同步回退，重新`git push -u origin dev`一次就可以了。可能会有`更新被拒绝，因为您当前分支的最新提交落后于其对应的远程分支`,这时需要强制推送，执行`git push --force -u orgin dev`
+		```
+		每次git push时，不一定都推送最新的head对应的commit，可以选择性推送部分commit历史记录中的某条commit对应的sha值，如推送倒数第二条的commit到远程origin仓库的main分支，执行git push origin sha-1值:main即可。
+		```
 	16. 常见处理分支冲突的办法，[(131) 你早晚都得会！最新Git & GitHub 实战教程：30分钟带你掌握开发必备技能 | 进阶技能 - YouTube](https://www.youtube.com/watch?v=a9T7dqDtRaY) 
 		1. 一般push失败时，应该远程分支有其它人已经更新分支，需先pull远程至本地，也有可能pull也会失败，需要指定如何调和偏离的分支。可以选择`merge`方式，把远程分支的更改合并到本地分支，创建一个新的合并，再提交。`git merge --no-rebase`或执行`git config pull.rebase false`后，以后直接执行`git pull`就可以了。不需要另加参数了。
 		2. 第二种方式是`rebase`方式，把本地提交移动到远程分支的最新提交的后面。好处是可以保持提交历史的线性，可能会破坏提交历史。
@@ -318,7 +321,12 @@ IdentityFile ~/.ssh/test
 	18. 工作临时中断，需要临时先处理其它分支，可先commit本分支后再切换到其他分支工作，处理完毕后，再`git reset HEAD^`回来原分支继续完成剩下的工作。另一种办法是，可使用`git stash`先把本分支作的修改先存起来，保存场景，（untracked状态的文件是没办法被stash,需要额外使用-u参数），再观察`git status`发现干净了。那些文件去哪儿了？可用`git stash list`查看。可执行多次`git stash`命令形成多份stash。WIP（work in progress）工作进行中的意思。
 	19. 已完成先前临时插入的其他工作，再回来原来中断并已stash的工作。找到`git stash list`中原中断的工作，如`stash@{2}`,执行`git stash pop stash@{2}`,将某个stash拿出来套用在目前的分支上，套用过的stash就会被删除。如果不想删除stash，可用`git stash apply stash@{2}0`代替，如果后面没有指定要pop哪一个stash，会从编号最小的，也就是`stash@{0}`开始拿（就是最后叠上去的那次）
 	20. 如果那个stash确定不要，可以使用`git stash drop stash@{0}`从列表中删除。
+	21. 删除多个commit中都共同存在的且已push的某个密码文件，比较直观的办法是使用rebase指令，一个一个comiit去编辑。可用`git filter-branch --tree-filter "rm -f config/database.yml"`即可。如果后悔了，而filter-branch操作执行的同时git会把状态备份一份在`.git/refs/original/refs/heads`目录里，实际只是备份进行filter-branch之前的那个HEAD的sha-1值而已。此时后悔可直接hard reset sha-1即可恢复删除前状态。或执行`git reset refs/original/refs/heads/master --hard`
+	22. 老实说已经push了，和倒出去的水一样收不回来，能做的就是`git push -f`,重新强制push一份刚刚已经filter-branch过的commit上去
+<<<<<<< HEAD
+	23. 只想要某个其他分支的几个commit，可用`git cherry-pick sha-1 sha-2 sha-3`,如果捡过来先不合并，在后面加上`--no-edit`,始`git cherry-pick sha-1 sha-2 sha-3 --no-edit`,先放在暂存区
 
+	24. 如果要彻底删除git中的文件，删除多个commit中都共同存在的且已push的某个密码文件，比较直观的办法是使用rebase指令，一个一个comiit去编辑。可用`git filter-branch -f --tree-filter "rm -f config/database.yml"`即可。-f参数强制覆盖filter-branch的备份点。 由于filter-branch操作执行的同时git会把状态备份一份在`.git/refs/original/refs/heads`目录里，实际只是备份进行filter-branch之前的那个HEAD的sha-1值而已。必须删除些sha-1备份，执行`rm .git/refs/original/refs/heads/master`。 再执行`git reflog expire --all --expire=now`,要求reflog现在立刻过期。再执行`git fsck --unreachable`可看到很多unreachable的物件了。再启动`git gc --prune=now`立刻让垃圾车把这些物件运走。再检查一遍`git fsck`
 
 
 
