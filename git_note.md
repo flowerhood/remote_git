@@ -323,13 +323,6 @@ IdentityFile ~/.ssh/test
 	20. 如果那个stash确定不要，可以使用`git stash drop stash@{0}`从列表中删除。
 	21. 删除多个commit中都共同存在的且已push的某个密码文件，比较直观的办法是使用rebase指令，一个一个comiit去编辑。可用`git filter-branch --tree-filter "rm -f config/database.yml"`即可。如果后悔了，而filter-branch操作执行的同时git会把状态备份一份在`.git/refs/original/refs/heads`目录里，实际只是备份进行filter-branch之前的那个HEAD的sha-1值而已。此时后悔可直接hard reset sha-1即可恢复删除前状态。或执行`git reset refs/original/refs/heads/master --hard`
 	22. 老实说已经push了，和倒出去的水一样收不回来，能做的就是`git push -f`,重新强制push一份刚刚已经filter-branch过的commit上去
-<<<<<<< HEAD
 	23. 只想要某个其他分支的几个commit，可用`git cherry-pick sha-1 sha-2 sha-3`,如果捡过来先不合并，在后面加上`--no-edit`,始`git cherry-pick sha-1 sha-2 sha-3 --no-edit`,先放在暂存区
 
 	24. 如果要彻底删除git中的文件，删除多个commit中都共同存在的且已push的某个密码文件，比较直观的办法是使用rebase指令，一个一个comiit去编辑。可用`git filter-branch -f --tree-filter "rm -f config/database.yml"`即可。-f参数强制覆盖filter-branch的备份点。 由于filter-branch操作执行的同时git会把状态备份一份在`.git/refs/original/refs/heads`目录里，实际只是备份进行filter-branch之前的那个HEAD的sha-1值而已。必须删除些sha-1备份，执行`rm .git/refs/original/refs/heads/master`。 再执行`git reflog expire --all --expire=now`,要求reflog现在立刻过期。再执行`git fsck --unreachable`可看到很多unreachable的物件了。再启动`git gc --prune=now`立刻让垃圾车把这些物件运走。再检查一遍`git fsck`
-
-
-
-
-
-
